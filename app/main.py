@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware # Importing CORSMiddleware
 from app.core.config import settings # Importing settings from core.config
 from app.db.base import engine, Base # Importing the database engine and base model
 from app.api.v1.endpoints import users
+from app.api.v1 import get_api_router
 
 import logging
 
@@ -29,6 +30,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(users.router, prefix=settings.API_V1_STR)
+app.include_router(get_api_router(), prefix=settings.API_V1_STR)
 
 
 # Root endpoint - returns a welcome message
