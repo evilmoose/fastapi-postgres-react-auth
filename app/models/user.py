@@ -1,5 +1,6 @@
+# app/models/user.py
 from typing import AsyncGenerator
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, ARRAY
 from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
 from fastapi import Depends
 from app.db.base import Base, AsyncSessionLocal
@@ -14,6 +15,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
+    roles = Column(ARRAY(String), default=["user"])
 
 async def get_user_db(session: AsyncSession = Depends(AsyncSessionLocal)):
     yield SQLAlchemyUserDatabase(session, User)
