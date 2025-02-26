@@ -1,0 +1,7 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add any custom styles you want to keep below this line */
+
