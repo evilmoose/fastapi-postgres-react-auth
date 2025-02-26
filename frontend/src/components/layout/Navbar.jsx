@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getFeatureNavItems } from '../../featureRegistry';
 
-function Navbar() {
+const Navbar = () => {
   const { user, logout } = useAuth();
+  const featureNavItems = getFeatureNavItems();
 
   return (
     <nav className="bg-white shadow">
@@ -19,6 +21,20 @@ function Navbar() {
                 <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
                   Dashboard
                 </Link>
+                {/* Render feature nav items */}
+                {featureNavItems
+                  .filter(item => !item.requiresAuth || user)
+                  .map((item, index) => (
+                    <Link 
+                      key={index}
+                      to={item.path} 
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      {item.label}
+                    </Link>
+                  ))
+                }
+                
                 <button
                   onClick={logout}
                   className="text-gray-600 hover:text-gray-900"

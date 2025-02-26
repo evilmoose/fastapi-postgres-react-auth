@@ -6,8 +6,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import { getFeatureRoutes } from './featureRegistry';
 
 const App = () => {
+  const featureRoutes = getFeatureRoutes();
+
   return (
     <AuthProvider>
       <Router>
@@ -26,6 +29,26 @@ const App = () => {
                   </ProtectedRoute>
                 } 
               />
+            {/* Dynamically render feature routes */}
+              {featureRoutes.map((route, index) => (
+                route.protected ? (
+                  <Route 
+                    key={index}
+                    path={route.path} 
+                    element={
+                      <ProtectedRoute>
+                        {route.element}
+                      </ProtectedRoute>
+                    } 
+                  />
+                ) : (
+                  <Route 
+                    key={index}
+                    path={route.path} 
+                    element={route.element} 
+                  />
+                )
+              ))}
             </Routes>
           </main>
         </div>

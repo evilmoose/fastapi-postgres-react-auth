@@ -1,18 +1,27 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState } from 'react'; // Add this import
 
-function Login() {
+const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   const onSubmit = async (data) => {
     try {
-      await login(data);
-      navigate('/dashboard');
+      setIsLoading(true);
+      const result = await login(data);
+      console.log(result);
+      if (result) {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (error) {
       console.error('Login failed:', error);
+      // Future Note: You might want to show an error message to the user here
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,9 +67,10 @@ function Login() {
 
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          Sign In
+          {isLoading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
     </div>

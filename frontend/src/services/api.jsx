@@ -28,7 +28,18 @@ export const authApi = {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
     });
-    return response.data;
+
+    // Set token immediately after receiving it
+    const token = response.data.access_token;
+    localStorage.setItem('token', token);
+
+    // After successful login, immediately fetch user data
+    const userData = await api.get('/users/me');
+
+    return {
+      access_token: response.data.access_token,
+      user: userData.data
+    };
   },
   register: async (userData) => {
     // Send as JSON instead of form data

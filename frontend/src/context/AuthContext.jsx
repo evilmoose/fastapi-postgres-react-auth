@@ -27,11 +27,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const { access_token, user } = await authApi.login(credentials);
+      const { access_token, user: userData } = await authApi.login(credentials);
       localStorage.setItem('token', access_token);
-      setUser(user);
-      return user;
+      setUser(userData);
+      return userData;
     } catch (error) {
+      console.error('Login failed:', error);
       throw error;
     }
   };
