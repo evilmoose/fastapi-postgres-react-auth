@@ -1,4 +1,5 @@
-from typing import Optional
+# app/schemas/user.py
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr
 from fastapi_users import schemas
 
@@ -8,6 +9,7 @@ class UserRead(schemas.BaseUser[int]):
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
+    roles: List[str] = ["user"]
 
     class Config:
         from_attributes = True

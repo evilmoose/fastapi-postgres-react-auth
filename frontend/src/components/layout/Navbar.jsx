@@ -6,6 +6,13 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const featureNavItems = getFeatureNavItems();
 
+  // Helper function to check if user has required roles
+  const hasRequiredRoles = (item) => {
+    if (!item.requiredRoles || item.requiredRoles.length === 0) return true;
+    if (!user || !user.roles) return false;
+    return item.requiredRoles.some(role => user.roles.includes(role));
+  };
+
   return (
     <nav className="bg-white shadow">
       <div className="container mx-auto px-4">
@@ -23,7 +30,7 @@ const Navbar = () => {
                 </Link>
                 {/* Render feature nav items */}
                 {featureNavItems
-                  .filter(item => !item.requiresAuth || user)
+                  .filter(item => (!item.requiresAuth || user) && hasRequiredRoles(item))
                   .map((item, index) => (
                     <Link 
                       key={index}

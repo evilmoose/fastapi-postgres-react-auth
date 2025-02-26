@@ -16,3 +16,9 @@ export function getFeatureRoutes() {
 export function getFeatureNavItems() {
   return registeredFeatures.flatMap(feature => feature.navItems || []);
 }
+
+export function getFeatureAdminComponents() {
+  return registeredFeatures
+    .filter(feature => feature.admin)
+    .map(feature => feature.admin);
+}

@@ -1,33 +1,37 @@
+# app/api/v1/features/sample-feature/endpoints.py
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from app.api import deps
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.session import get_session_local
 from app.models.user import User
 from . import models, schemas
+from app.api.deps import get_current_user_with_roles
 
 router = APIRouter()
 
 @router.get("/", response_model=List[schemas.SampleItem])
-def read_sample_items(
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+async def read_sample_items(
+    db: AsyncSession = Depends(get_session_local),
+    current_user: User = Depends(get_current_user_with_roles(["user"])),
     skip: int = 0,
     limit: int = 100,
 ):
     """
     Retrieve sample items for the current user.
     """
-    items = db.query(models.SampleModel).filter(
-        models.SampleModel.user_id == current_user.id
-    ).offset(skip).limit(limit).all()
-    return items
+    result = await db.execute(
+        db.query(models.SampleModel)
+        .filter(models.SampleModel.user_id == current_user.id)
+        .offset(skip)
+        .limit(limit)
+    )
+    return result.scalars().all()
 
 @router.post("/", response_model=schemas.SampleItem)
-def create_sample_item(
+async def create_sample_item(
     *,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    db: AsyncSession = Depends(get_session_local),
+    current_user: User = Depends(get_current_user_with_roles(["user"])),
     item_in: schemas.SampleItemCreate,
 ):
     """
@@ -39,24 +43,49 @@ def create_sample_item(
         user_id=current_user.id
     )
     db.add(item)
-    db.commit()
-    db.refresh(item)
+    await db.commit()
+    await db.refresh(item)
     return item
 
 @router.get("/{item_id}", response_model=schemas.SampleItem)
-def read_sample_item(
+async def read_sample_item(
     *,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    db: AsyncSession = Depends(get_session_local),
+    current_user: User = Depends(get_current_user_with_roles(["user"])),
     item_id: int,
 ):
     """
     Get sample item by ID.
     """
-    item = db.query(models.SampleModel).filter(
-        models.SampleModel.id == item_id,
-        models.SampleModel.user_id == current_user.id
-    ).first()
+    result = await db.execute(
+        db.query(models.SampleModel)
+        .filter(
+            models.SampleModel.id == item_id,
+            models.SampleModel.user_id == current_user.id
+        )
+    )
+    item = result.scalar_one_or_none()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_sample_item(
+    *,
+    db: AsyncSession = Depends(get_session_local),
+    current_user: User = Depends(get_current_user_with_roles(["admin"])),
+    item_id: int,
+):
+    """
+    Delete a sample item (admin only).
+    """
+    result = await db.execute(
+        db.query(models.SampleModel).filter(models.SampleModel.id == item_id)
+    )
+    item = result.scalar_one_or_none()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    await db.delete(item)
+    await db.commit()
+    return None

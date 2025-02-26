@@ -10,6 +10,9 @@ from alembic import context
 from app.db.base import Base  # SQLAlchemy Base model import
 from app.core.config import settings  # Import settings to access database configuration
 
+from app.models.user import User
+from app.api.v1.features.sample_feature.models import SampleModel
+
 # Alembic configuration object
 config = context.config
 
