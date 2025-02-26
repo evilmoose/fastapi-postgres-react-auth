@@ -13,7 +13,13 @@ const Register = () => {
         email: data.email,
         password: data.password
       });
-      navigate('/login');
+
+      // Redirect to login page after successful registration
+      await login({
+        email: data.email,
+        password: data.password
+      });
+      navigate('/dashboard');
     } catch (error) {
       console.error('Registration failed:', error);
     }
